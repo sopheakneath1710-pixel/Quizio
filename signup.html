@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up – Quizio</title>
+
+<meta name="description" content="Create a Quizio account to build and play interactive educational games.">
+<meta name="theme-color" content="#0b57d0">
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* (UNCHANGED STYLES – kept exactly as yours) */
+:root {
+  --blue-main:#0b57d0;
+  --blue-light:#1e88ff;
+  --blue-soft:#eaf2ff;
+  --text-dark:#1f2937;
+  --text-muted:#6b7280;
+  --border-soft:#e5e7eb;
+  --error:#e63946;
+  --warning:#f59e0b;
+  --success:#22c55e;
+  --radius-lg:22px;
+  --radius-md:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#f9fafb;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:16px;
+  font-family:'Nunito',sans-serif;
+}
+.login-card{
+  background:white;
+  width:100%;
+  max-width:420px;
+  padding:36px 32px 40px;
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border-soft);
+  animation:cardIn .6s ease forwards;
+}
+@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+h1{text-align:center;font-family:'Fredoka';font-size:30px}
+.divider{height:1px;background:var(--border-soft);margin:18px 0 28px}
+label{font-weight:600;font-size:14px;margin-bottom:6px;display:block}
+.input-group{margin-bottom:18px}
+.input-group input{
+  width:100%;height:48px;border-radius:16px;border:1px solid var(--border-soft);
+  padding:0 16px;font-size:15px
+}
+.password-wrapper{position:relative}
+.password-wrapper input{padding-right:46px}
+.toggle-password{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer
+}
+.strength{height:6px;background:#e5e7eb;border-radius:6px;margin-top:8px}
+.strength span{display:block;height:100%;width:0%;transition:.3s}
+.strength-info{font-size:13px;margin-top:6px;font-weight:600}
+.strength-tip{font-size:13px;margin-top:4px;color:#6b7280}
+.row{font-size:14px;margin:10px 0 26px}
+.login-btn{
+  width:100%;height:52px;background:var(--blue-main);border:none;
+  border-radius:999px;color:white;font-size:18px;font-family:'Fredoka';cursor:pointer
+}
+.social{text-align:center}
+.provider-btn{
+  width:100%;height:48px;border-radius:16px;border:1px solid #e5e7eb;
+  background:white;display:flex;align-items:center;justify-content:center;
+  gap:10px;font-family:'Fredoka';cursor:pointer;margin-bottom:12px
+}
+#verifyCard{display:none;text-align:center}
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:#111;color:white;padding:14px 20px;border-radius:16px;display:none
+}
+</style>
+</head>
+
+<body>
+
+<script>
+if (localStorage.getItem("quizio_logged_in") === "true") {
+  window.location.href = "dashboard.html";
+}
+</script>
+
+<div class="login-card" id="signupCard">
+  <h1>Sign Up</h1>
+  <div class="divider"></div>
+
+  <form id="signupForm">
+
+    <label>Email</label>
+    <div class="input-group">
+      <input id="email" type="email" required>
+    </div>
+
+    <label>Password</label>
+    <div class="input-group">
+      <div class="password-wrapper">
+        <input id="password" type="password" required>
+        <button type="button" class="toggle-password" data-target="password"></button>
+      </div>
+      <div class="strength"><span id="strengthBar"></span></div>
+      <div class="strength-info" id="strengthLabel">Weak</div>
+      <div class="strength-tip" id="strengthTip">Use at least 8 characters</div>
+    </div>
+
+    <label>Confirm Password</label>
+    <div class="input-group">
+      <div class="password-wrapper">
+        <input id="confirm" type="password" required>
+        <button type="button" class="toggle-password" data-target="confirm"></button>
+      </div>
+    </div>
+
+    <div class="row">
+      <label><input type="checkbox" id="terms"> I agree to Terms</label>
+    </div>
+
+    <button class="login-btn">Create Account</button>
+  </form>
+</div>
+
+<div class="login-card" id="verifyCard">
+  <h1>Verify Email</h1>
+  <div class="divider"></div>
+  <p>Verification email sent to</p>
+  <strong id="verifyEmail"></strong>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const toast = msg => {
+  toastEl.textContent = msg;
+  toastEl.style.display = "block";
+  setTimeout(()=>toastEl.style.display="none",3000);
+};
+
+signupForm.onsubmit = e => {
+  e.preventDefault();
+
+  if (password.value.length < 8) return toast("Password too short");
+  if (password.value !== confirm.value) return toast("Passwords do not match");
+  if (!terms.checked) return toast("Accept terms first");
+
+  localStorage.setItem("quizio_logged_in","true");
+  localStorage.setItem("quizio_user_email",email.value);
+  localStorage.setItem("quizio_user_name",email.value.split("@")[0]);
+
+  signupCard.style.display="none";
+  verifyCard.style.display="block";
+  verifyEmail.textContent=email.value;
+
+  setTimeout(()=>location.href="dashboard.html",2500);
+};
+</script>
+
+</body>
+</html>

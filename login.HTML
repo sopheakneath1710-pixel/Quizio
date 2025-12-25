@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In – Quizio</title>
+
+<!-- SEO / PWA -->
+<meta name="description" content="Log in to Quizio to create and play motion-controlled educational games.">
+<meta name="theme-color" content="#0b57d0">
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --blue-main:#0b57d0;
+  --blue-light:#1e88ff;
+  --blue-soft:#eaf2ff;
+  --text-dark:#1f2937;
+  --text-muted:#6b7280;
+  --border-soft:#e5e7eb;
+  --error:#e63946;
+  --radius-lg:22px;
+  --radius-md:16px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:#f9fafb;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:16px;
+  font-family:'Nunito',sans-serif;
+  color:var(--text-dark);
+}
+
+.login-card {
+  background:white;
+  width:100%;
+  max-width:420px;
+  padding:36px 32px 40px;
+  border-radius:var(--radius-lg);
+  border:1px solid var(--border-soft);
+  opacity:0;
+  transform:translateY(20px);
+  animation:cardIn .6s ease forwards;
+}
+
+@keyframes cardIn { to { opacity:1; transform:translateY(0); } }
+
+h1 {
+  text-align:center;
+  font-family:'Fredoka',sans-serif;
+  font-size:30px;
+  font-weight:600;
+  margin-bottom:6px;
+}
+
+.divider {
+  height:1px;
+  background:var(--border-soft);
+  margin:18px 0 28px;
+}
+
+label {
+  font-weight:600;
+  font-size:14px;
+  margin-bottom:6px;
+  display:block;
+}
+
+.input-group {
+  margin-bottom:18px;
+  position:relative;
+}
+
+.input-group input {
+  width:100%;
+  height:48px;
+  border-radius:var(--radius-md);
+  border:1px solid var(--border-soft);
+  padding:0 46px 0 16px;
+  font-size:15px;
+}
+
+.input-group input:focus {
+  outline:none;
+  border-color:var(--blue-light);
+  box-shadow:0 0 0 3px var(--blue-soft);
+}
+
+.input-group.error input { border-color:var(--error); }
+
+.error-text {
+  font-size:13px;
+  color:var(--error);
+  margin-top:6px;
+  display:none;
+}
+
+.input-group.error .error-text { display:block; }
+
+.toggle-password {
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:none;
+  cursor:pointer;
+  opacity:.7;
+}
+
+.toggle-password svg {
+  width:20px;
+  height:20px;
+  stroke:var(--text-muted);
+}
+
+.row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:14px;
+  margin:10px 0 26px;
+}
+
+.row a {
+  color:var(--blue-main);
+  font-weight:600;
+  text-decoration:none;
+}
+
+.login-btn {
+  width:100%;
+  height:52px;
+  background:var(--blue-main);
+  border:none;
+  border-radius:999px;
+  color:white;
+  font-size:18px;
+  font-family:'Fredoka',sans-serif;
+  font-weight:500;
+  margin-bottom:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  cursor:pointer;
+}
+
+.login-btn:hover { background:var(--blue-light); }
+
+.spinner {
+  width:18px;
+  height:18px;
+  border:3px solid rgba(255,255,255,.4);
+  border-top-color:white;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  display:none;
+}
+
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.loading .spinner { display:inline-block; }
+.loading span { display:none; }
+
+.signup-text {
+  text-align:center;
+  margin-bottom:26px;
+  font-size:14px;
+}
+
+.signup-text a {
+  color:var(--blue-main);
+  font-weight:600;
+  text-decoration:none;
+}
+
+.social {
+  text-align:center;
+}
+
+.social p {
+  font-size:14px;
+  color:var(--text-muted);
+  margin-bottom:14px;
+}
+
+.provider-btn {
+  width:100%;
+  height:48px;
+  border-radius:var(--radius-md);
+  border:1px solid var(--border-soft);
+  background:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  font-weight:600;
+  font-family:'Fredoka',sans-serif;
+  cursor:pointer;
+  margin-bottom:12px;
+}
+
+.provider-btn:hover { background:var(--blue-soft); }
+
+.provider-btn img { width:18px; }
+</style>
+</head>
+
+<body>
+
+<script>
+/* Redirect if already logged in */
+if (localStorage.getItem("quizio_logged_in") === "true") {
+  window.location.href = "dashboard.html";
+}
+</script>
+
+<div class="login-card">
+  <h1>Log In</h1>
+  <div class="divider"></div>
+
+  <form id="loginForm">
+
+    <label>Email</label>
+    <div class="input-group" id="emailGroup">
+      <input type="email" id="email" placeholder="example@example.com" required>
+      <div class="error-text">Please enter a valid email address</div>
+    </div>
+
+    <label>Password</label>
+    <div class="input-group" id="passwordGroup">
+      <input type="password" id="password" placeholder="•••••••" required>
+      <button type="button" class="toggle-password" data-target="password"></button>
+      <div class="error-text">Password must be at least 6 characters</div>
+    </div>
+
+    <div class="row">
+      <label><input type="checkbox"> Remember me</label>
+      <a href="#">Forgot Password?</a>
+    </div>
+
+    <button type="submit" class="login-btn" id="loginBtn">
+      <span>Log In</span>
+      <div class="spinner"></div>
+    </button>
+
+  </form>
+
+  <div class="signup-text">
+    New to Quizio? <a href="signup.html">Sign Up Here</a>
+  </div>
+
+  <div class="social">
+    <p>Log in with</p>
+
+    <button class="provider-btn" id="googleLogin">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">
+      Log in with Google
+    </button>
+
+    <button class="provider-btn" id="yahooLogin">
+      <img src="yahoo_icon.png">
+      Log in with Yahoo
+    </button>
+  </div>
+</div>
+
+<script>
+const eyeOpen = `
+<svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+  <circle cx="12" cy="12" r="3"/>
+</svg>`;
+
+const eyeOff = `
+<svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+  <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.8 21.8 0 0 1 5.06-6.94"/>
+  <path d="M1 1l22 22"/>
+</svg>`;
+
+document.querySelectorAll(".toggle-password").forEach(btn => btn.innerHTML = eyeOff);
+
+document.querySelectorAll(".toggle-password").forEach(btn => {
+  btn.onclick = () => {
+    const input = document.getElementById(btn.dataset.target);
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    btn.innerHTML = show ? eyeOpen : eyeOff;
+  };
+});
+
+/* TEMP LOGIN (Replace with Firebase later) */
+function fakeLogin() {
+  const emailVal = email.value.trim();
+  const username = emailVal.split("@")[0];
+
+  localStorage.setItem("quizio_logged_in", "true");
+  localStorage.setItem("quizio_user_email", emailVal);
+  localStorage.setItem("quizio_user_name", username);
+
+  window.location.href = "dashboard.html";
+}
+
+loginForm.onsubmit = e => {
+  e.preventDefault();
+
+  let valid = true;
+
+  if (!email.value.includes("@")) {
+    emailGroup.classList.add("error");
+    valid = false;
+  } else emailGroup.classList.remove("error");
+
+  if (password.value.length < 6) {
+    passwordGroup.classList.add("error");
+    valid = false;
+  } else passwordGroup.classList.remove("error");
+
+  if (!valid) return;
+
+  loginBtn.classList.add("loading");
+  setTimeout(fakeLogin, 1200);
+};
+
+googleLogin.onclick = yahooLogin.onclick = () => {
+  loginBtn.classList.add("loading");
+  setTimeout(fakeLogin, 1000);
+};
+</script>
+
+</body>
+</html>
