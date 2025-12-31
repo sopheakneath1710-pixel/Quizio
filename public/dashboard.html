@@ -46,7 +46,7 @@ body{
   z-index:9999;
 }
 
-/* === YOUR ORIGINAL STYLES (UNCHANGED) === */
+/* ===== ORIGINAL STYLES ===== */
 .sidebar{
   width:260px;
   background:var(--blue-main);
@@ -222,7 +222,7 @@ body{
 ======================= */
 const supabase = window.supabase.createClient(
   "https://vobglhlucwodmlzphmvc.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvYmdsaGx1Y3dvZG1senBobXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NDI3NTUsImV4cCI6MjA4MjIxODc1NX0.TVsMoM0d_4wvrNfjAGid59FmCKBRYcqJMUC8MAEZg1A"
+  "YOUR_ANON_KEY_HERE"
 );
 
 /* =======================
@@ -248,13 +248,13 @@ function loadAvatar(email, name){
 }
 
 /* =======================
-   AUTH GUARD
+   AUTH GUARD (PRODUCTION)
 ======================= */
 (async () => {
   const { data, error } = await supabase.auth.getUser();
 
-  if (error || !data.user) {
-    window.location.replace("login.html");
+  if (error || !data?.user) {
+    window.location.replace("signup.html");
     return;
   }
 
@@ -273,10 +273,9 @@ function loadAvatar(email, name){
 ======================= */
 document.getElementById("logoutBtn").onclick = async () => {
   await supabase.auth.signOut();
-  window.location.replace("login.html");
+  window.location.replace("signup.html");
 };
 </script>
 
 </body>
 </html>
-
