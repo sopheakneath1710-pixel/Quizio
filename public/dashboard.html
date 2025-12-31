@@ -32,6 +32,21 @@ body{
   font-family:'Nunito',sans-serif;
   color:var(--text-dark);
 }
+
+/* Loading overlay */
+#loading {
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.96);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.1rem;
+  z-index:9999;
+}
+
+/* === YOUR ORIGINAL STYLES (UNCHANGED) === */
 .sidebar{
   width:260px;
   background:var(--blue-main);
@@ -109,7 +124,6 @@ body{
   margin-bottom:12px;
 }
 .login{background:#38bdf8;color:white}
-.signup{background:#7dd3fc;color:#003a8f}
 .main{
   flex:1;
   padding:28px 36px;
@@ -164,6 +178,8 @@ body{
 
 <body>
 
+<div id="loading">Checking session…</div>
+
 <aside class="sidebar">
   <div class="logo">Quizio</div>
 
@@ -201,45 +217,63 @@ body{
 </main>
 
 <script>
-/* 🔐 SUPABASE */
+/* =======================
+   SUPABASE CONFIG
+======================= */
 const supabase = window.supabase.createClient(
   "https://vobglhlucwodmlzphmvc.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvYmdsaGx1Y3dvZG1senBobXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NDI3NTUsImV4cCI6MjA4MjIxODc1NX0.TVsMoM0d_4wvrNfjAGid59FmCKBRYcqJMUC8MAEZg1A"
+  "YOUR_PUBLIC_ANON_KEY"
 );
 
+/* =======================
+   ELEMENTS
+======================= */
 const nameEl = document.getElementById("profileName");
 const emailEl = document.getElementById("profileEmail");
 const avatarEl = document.getElementById("avatar");
+const loadingEl = document.getElementById("loading");
 
+/* =======================
+   HELPERS
+======================= */
 function md5(str){
   return CryptoJS.MD5(str.trim().toLowerCase()).toString();
 }
 
-function loadAvatar(email,name){
-  const img=new Image();
-  img.src=`https://www.gravatar.com/avatar/${md5(email)}?d=404&s=200`;
-  img.onload=()=>avatarEl.innerHTML=`<img src="${img.src}">`;
-  img.onerror=()=>avatarEl.textContent=name[0].toUpperCase();
+function loadAvatar(email, name){
+  const img = new Image();
+  img.src = `https://www.gravatar.com/avatar/${md5(email)}?d=404&s=200`;
+  img.onload = () => avatarEl.innerHTML = `<img src="${img.src}">`;
+  img.onerror = () => avatarEl.textContent = name[0].toUpperCase();
 }
 
-(async ()=>{
-  const { data:{ user } } = await supabase.auth.getUser();
+/* =======================
+   AUTH GUARD
+======================= */
+(async () => {
+  const { data, error } = await supabase.auth.getUser();
 
-  if(!user){
-    location.href="login.html";
+  if (error || !data.user) {
+    window.location.replace("login.html");
     return;
   }
 
+  const user = data.user;
   const name = user.user_metadata?.name || user.email.split("@")[0];
+
   nameEl.textContent = name;
   emailEl.textContent = user.email;
+  loadAvatar(user.email, name);
 
-  loadAvatar(user.email,name);
+  loadingEl.remove();
 })();
 
-document.getElementById("logoutBtn").onclick = async ()=>{
+/* =======================
+   LOGOUT
+======================= */
+document.getElementById("logoutBtn").onclick = async () => {
   await supabase.auth.signOut();
-  location.href="login.html";
+  window.location.replace("login.html");
 };
 </script>
 
