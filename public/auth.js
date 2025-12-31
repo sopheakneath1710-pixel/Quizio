@@ -2,7 +2,7 @@
 // SUPABASE CONFIG
 // =====================
 const SUPABASE_URL = "https://vobglhlucwodmlzphmvc.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvYmdsaGx1Y3dvZG1senBobXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2NDI3NTUsImV4cCI6MjA4MjIxODc1NX0.TVsMoM0d_4wvrNfjAGid59FmCKBRYcqJMUC8MAEZg1A";
 
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
