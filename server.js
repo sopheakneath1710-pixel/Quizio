@@ -2,51 +2,20 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// ------------------------
-// Fix __dirname for ESModules
-// ------------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ------------------------
-// App setup
-// ------------------------
 const app = express();
 
-// Trust Railway / proxy headers
-app.set("trust proxy", true);
+// Serve static files
+app.use(express.static(path.join(__dirname, "public")));
 
-// ------------------------
-// Static files
-// ------------------------
-const publicPath = path.join(__dirname, "public");
-app.use(express.static(publicPath));
-
-// ------------------------
-// Root route
-// ------------------------
+// Root URL → dashboard.html
 app.get("/", (req, res) => {
-  res.sendFile(path.join(publicPath, "login.html"));
+  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-// ------------------------
-// Health check (optional but recommended)
-// ------------------------
-app.get("/health", (req, res) => {
-  res.status(200).send("OK");
-});
-
-// ------------------------
-// Catch-all for direct refresh on pages
-// ------------------------
-app.get("*", (req, res) => {
-  res.sendFile(path.join(publicPath, "login.html"));
-});
-
-// ------------------------
-// Start server
-// ------------------------
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`✅ Quizio running on port ${PORT}`);
+  console.log("✅ Quizio running on port", PORT);
 });
