@@ -21,8 +21,6 @@
   --text-dark:#1f2937;
   --text-muted:#6b7280;
   --border-soft:#e5e7eb;
-  --radius-lg:16px;
-  --radius-md:12px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -31,19 +29,6 @@ body{
   background:#f9fafb;
   font-family:'Nunito',sans-serif;
   color:var(--text-dark);
-}
-
-/* Loading overlay */
-#loading {
-  position:fixed;
-  inset:0;
-  background:rgba(15,23,42,.96);
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1.1rem;
-  z-index:9999;
 }
 
 /* ===== ORIGINAL STYLES ===== */
@@ -93,7 +78,6 @@ body{
   display:block;
   font-size:13px;
   opacity:.85;
-  font-weight:400;
 }
 .menu{flex:1}
 .menu a{text-decoration:none}
@@ -121,7 +105,6 @@ body{
   cursor:pointer;
   font-size:15px;
   font-family:'Fredoka',sans-serif;
-  margin-bottom:12px;
 }
 .login{background:#38bdf8;color:white}
 .main{
@@ -178,8 +161,6 @@ body{
 
 <body>
 
-<div id="loading">Checking session…</div>
-
 <aside class="sidebar">
   <div class="logo">Quizio</div>
 
@@ -231,7 +212,7 @@ const supabase = window.supabase.createClient(
 const nameEl = document.getElementById("profileName");
 const emailEl = document.getElementById("profileEmail");
 const avatarEl = document.getElementById("avatar");
-const loadingEl = document.getElementById("loading");
+const logoutBtn = document.getElementById("logoutBtn");
 
 /* =======================
    HELPERS
@@ -248,7 +229,7 @@ function loadAvatar(email, name){
 }
 
 /* =======================
-   AUTH GUARD (PRODUCTION)
+   AUTH GUARD
 ======================= */
 (async () => {
   const { data, error } = await supabase.auth.getUser();
@@ -264,14 +245,12 @@ function loadAvatar(email, name){
   nameEl.textContent = name;
   emailEl.textContent = user.email;
   loadAvatar(user.email, name);
-
-  loadingEl.remove();
 })();
 
 /* =======================
    LOGOUT
 ======================= */
-document.getElementById("logoutBtn").onclick = async () => {
+logoutBtn.onclick = async () => {
   await supabase.auth.signOut();
   window.location.replace("signup.html");
 };
