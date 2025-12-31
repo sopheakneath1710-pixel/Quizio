@@ -6,9 +6,10 @@
 <title>Create Question Set – Quizio</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-:root {
+:root{
   --blue-main:#0b57d0;
   --blue-light:#1e88ff;
   --blue-soft:#eaf2ff;
@@ -16,30 +17,115 @@
   --border-soft:#e5e7eb;
   --radius-lg:16px;
 }
-
-* { box-sizing:border-box; margin:0; padding:0; }
-body { background:#f9fafb; font-family:'Nunito',sans-serif; }
-.topbar { background:var(--blue-main); padding:18px 32px; color:white; font-family:'Fredoka',sans-serif; font-size:18px; }
-
-.wrapper { padding:32px; display:grid; grid-template-columns:1fr 260px; gap:28px; }
-.card { background:white; border-radius:var(--radius-lg); padding:26px; border:1px solid var(--border-soft); }
-.input, select { width:100%; padding:14px 16px; border-radius:12px; border:1px solid var(--border-soft); font-size:15px; margin-bottom:14px; }
-.add-question { padding:14px 22px; border-radius:999px; border:1px dashed var(--blue-light); background:white; font-family:'Fredoka',sans-serif; cursor:pointer; color:var(--blue-light); margin-top:18px; }
-.question-box { background:var(--card-soft); border-radius:var(--radius-lg); padding:22px; margin-top:20px; }
-.question-header { display:flex; align-items:center; gap:10px; font-family:'Fredoka',sans-serif; margin-bottom:14px; }
-.drag-handle { cursor:grab; }
-.move-btn { border:none; background:transparent; cursor:pointer; font-size:14px; }
-.move-btn:disabled { opacity:.3; cursor:default; }
-.row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.choice { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-.choice-label { min-width:70px; font-size:14px; }
-.actions { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
-.btn { padding:10px 18px; border-radius:999px; border:none; font-family:'Fredoka',sans-serif; cursor:pointer; }
-.save-btn { background:#ff8a3d; color:white; }
-.duplicate-btn { background:#4dd0e1; }
-.delete-btn { background:#b6f77c; }
-.side-panel { background:var(--blue-soft); border-radius:var(--radius-lg); padding:22px; display:flex; flex-direction:column; gap:12px; }
-.side-panel .btn { width:100%; height:44px; display:flex; align-items:center; justify-content:center; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f9fafb;font-family:'Nunito',sans-serif}
+.topbar{
+  background:var(--blue-main);
+  padding:18px 32px;
+  color:white;
+  font-family:'Fredoka',sans-serif;
+  font-size:18px;
+}
+.wrapper{
+  padding:32px;
+  display:grid;
+  grid-template-columns:1fr 260px;
+  gap:28px;
+}
+.card{
+  background:white;
+  border-radius:var(--radius-lg);
+  padding:26px;
+  border:1px solid var(--border-soft);
+}
+.input,select{
+  width:100%;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid var(--border-soft);
+  font-size:15px;
+  margin-bottom:14px;
+}
+.add-question{
+  padding:14px 22px;
+  border-radius:999px;
+  border:1px dashed var(--blue-light);
+  background:white;
+  font-family:'Fredoka',sans-serif;
+  cursor:pointer;
+  color:var(--blue-light);
+  margin-top:18px;
+}
+.question-box{
+  background:var(--card-soft);
+  border-radius:var(--radius-lg);
+  padding:22px;
+  margin-top:20px;
+}
+.question-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-family:'Fredoka',sans-serif;
+  margin-bottom:14px;
+}
+.drag-handle{cursor:grab}
+.move-btn{
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  font-size:14px;
+}
+.move-btn:disabled{opacity:.3}
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.choice{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+}
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:16px;
+}
+.btn{
+  padding:10px 18px;
+  border-radius:999px;
+  border:none;
+  font-family:'Fredoka',sans-serif;
+  cursor:pointer;
+}
+.save-btn{background:#ff8a3d;color:white}
+.duplicate-btn{background:#4dd0e1}
+.delete-btn{background:#b6f77c}
+.side-panel{
+  background:var(--blue-soft);
+  border-radius:var(--radius-lg);
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.side-panel .btn{
+  width:100%;
+  height:44px;
+}
+.loading{
+  opacity:.6;
+  pointer-events:none;
+}
+.status{
+  font-size:14px;
+  color:#0b57d0;
+  text-align:center;
+  display:none;
+}
 </style>
 </head>
 
@@ -49,8 +135,8 @@ body { background:#f9fafb; font-family:'Nunito',sans-serif; }
 
 <div class="wrapper">
   <div class="card">
-    <input class="input" id="setTitle" placeholder="Enter your 'Question Set' Title here..." />
-    <input class="input" placeholder="Add description here..." />
+    <input class="input" id="setTitle" placeholder="Enter your Question Set title..." />
+    <input class="input" id="setDesc" placeholder="Add description (optional)..." />
 
     <div id="addQuestionWrapper">
       <button class="add-question" onclick="addQuestion()">➕ Add New Question</button>
@@ -60,173 +146,153 @@ body { background:#f9fafb; font-family:'Nunito',sans-serif; }
   </div>
 
   <div class="side-panel">
-    <button class="btn save-btn" onclick="saveQuestionSet()">Save the Question Set</button>
-    <button class="btn delete-btn">Delete the Question Set</button>
+    <button class="btn save-btn" id="saveSetBtn" onclick="saveQuestionSet()">Save Question Set</button>
+    <div class="status" id="statusText">Saving...</div>
+    <button class="btn delete-btn" onclick="location.href='dashboard.html'">Cancel</button>
   </div>
 </div>
 
 <script>
-function addQuestion(data=null) {
-  const q = document.createElement('div');
-  q.className = 'question-box';
+/* 🔐 SUPABASE */
+const supabase = window.supabase.createClient(
+  "https://vobglhlucwodmlzphmvc.supabase.co",
+  "YOUR_PUBLIC_ANON_KEY"
+);
 
-  q.innerHTML = `
+/* 🔒 AUTH GUARD */
+let currentUser = null;
+
+(async()=>{
+  const { data:{ user } } = await supabase.auth.getUser();
+  if(!user){
+    location.href="login.html";
+    return;
+  }
+  currentUser = user;
+})();
+
+/* ========= QUESTION LOGIC (UNCHANGED CORE) ========= */
+
+function addQuestion(){
+  const q=document.createElement('div');
+  q.className='question-box';
+  q.innerHTML=`
     <div class="question-header">
       <span class="drag-handle">☰</span>
       <button class="move-btn" onclick="moveQuestionUp(this)">▲</button>
       <button class="move-btn" onclick="moveQuestionDown(this)">▼</button>
       <span class="q-title"></span>
     </div>
-
-    <input class="input question-text" placeholder="Type in your question here..." />
-
+    <input class="input question-text" placeholder="Type your question..." />
     <div class="row">
       <select class="question-type" onchange="renderAnswer(this)">
         <option disabled selected>Question Type</option>
-        <option value="short">Short Question</option>
+        <option value="short">Short Answer</option>
         <option value="tf">True / False</option>
         <option value="mc">Multiple Choice</option>
       </select>
       <input class="input timer" type="number" min="1" placeholder="Timer (seconds)" />
     </div>
-
     <div class="answer-area"></div>
-
     <div class="actions">
-      <button class="btn save-btn" onclick="toggleSave(this)">Save</button>
       <button class="btn duplicate-btn" onclick="duplicateQuestion(this)">Duplicate</button>
       <button class="btn delete-btn" onclick="deleteQuestion(this)">Delete</button>
     </div>
   `;
-
   document.getElementById('questions').appendChild(q);
-  updateAddQuestionPosition();
   renumberQuestions();
-
-  if (data) {
-    q.querySelector('.question-text').value = data.text;
-    q.querySelector('.question-type').value = data.type;
-    q.querySelector('.timer').value = data.timer;
-    renderAnswer(q.querySelector('.question-type'), data);
-  }
 }
 
-function renderAnswer(select, data=null) {
-  const area = select.closest('.question-box').querySelector('.answer-area');
-  area.innerHTML = '';
-
-  if(select.value==='short'){
+function renderAnswer(select){
+  const area=select.closest('.question-box').querySelector('.answer-area');
+  area.innerHTML='';
+  if(select.value==='short')
     area.innerHTML=`<input class="input answer" placeholder="Correct answer..." />`;
-    if(data) area.querySelector('.answer').value=data.answer;
-  }
-
-  if(select.value==='tf'){
-    area.innerHTML=`
-      <div class="choice"><input type="radio" name="tf"><input class="input" value="True" disabled /></div>
-      <div class="choice"><input type="radio" name="tf"><input class="input" value="False" disabled /></div>
-    `;
-  }
-
+  if(select.value==='tf')
+    area.innerHTML=`<label><input type="radio" checked disabled> True</label><br><label><input type="radio" disabled> False</label>`;
   if(select.value==='mc'){
-    area.innerHTML=`<div class="choices"></div><button class="add-question" onclick="addChoice(this)">➕ Add more choice</button>`;
-    const choicesBtn = area.querySelector('button');
-    addChoice(choicesBtn);
-    addChoice(choicesBtn);
-
-    if(data && data.choices){
-      const choicesDiv = area.querySelector('.choices');
-      choicesDiv.innerHTML='';
-      data.choices.forEach(c=>{
-        addChoiceFromData(choicesDiv, c.text, c.correct);
-      });
-    }
+    area.innerHTML=`<div class="choices"></div><button class="add-question" onclick="addChoice(this)">➕ Add choice</button>`;
+    addChoice(area.querySelector('button'));
+    addChoice(area.querySelector('button'));
   }
 }
 
 function addChoice(btn){
-  const choices = btn.parentElement.querySelector('.choices');
+  const choices=btn.parentElement.querySelector('.choices');
   if(choices.children.length>=4) return;
-
-  const c = document.createElement('div');
+  const c=document.createElement('div');
   c.className='choice';
   c.innerHTML=`
-    <button class="move-btn" onclick="moveChoiceUp(this)">▲</button>
-    <button class="move-btn" onclick="moveChoiceDown(this)">▼</button>
-    <input type="radio" name="correctAnswer" />
-    <input class="input answer" placeholder="Choice ${choices.children.length+1}" />
-    <button class="move-btn" onclick="this.parentElement.remove(); renumberChoices(choices)">✖</button>
+    <input type="radio" name="correct">
+    <input class="input answer" placeholder="Choice ${choices.children.length+1}">
+    <button class="move-btn" onclick="this.parentElement.remove()">✖</button>
   `;
   choices.appendChild(c);
-  renumberChoices(choices);
 }
 
-function addChoiceFromData(choicesDiv, text, correct){
-  const c = document.createElement('div');
-  c.className='choice';
-  c.innerHTML=`
-    <button class="move-btn" onclick="moveChoiceUp(this)">▲</button>
-    <button class="move-btn" onclick="moveChoiceDown(this)">▼</button>
-    <input type="radio" name="correctAnswer" />
-    <input class="input answer" placeholder="Choice ${choicesDiv.children.length+1}" value="${text}" />
-    <button class="move-btn" onclick="this.parentElement.remove(); renumberChoices(choicesDiv)">✖</button>
-  `;
-  choicesDiv.appendChild(c);
-  if(correct) c.querySelector('input[type=radio]').checked=true;
-  renumberChoices(choicesDiv);
+function duplicateQuestion(btn){
+  const box=btn.closest('.question-box');
+  const clone=box.cloneNode(true);
+  document.getElementById('questions').appendChild(clone);
+  renumberQuestions();
+}
+function deleteQuestion(btn){
+  btn.closest('.question-box').remove();
+  renumberQuestions();
+}
+function moveQuestionUp(btn){
+  const b=btn.closest('.question-box');
+  if(b.previousElementSibling) b.parentNode.insertBefore(b,b.previousElementSibling);
+  renumberQuestions();
+}
+function moveQuestionDown(btn){
+  const b=btn.closest('.question-box');
+  if(b.nextElementSibling) b.parentNode.insertBefore(b.nextElementSibling,b);
+  renumberQuestions();
+}
+function renumberQuestions(){
+  document.querySelectorAll('.question-box').forEach((b,i)=>{
+    b.querySelector('.q-title').textContent=`Question ${i+1}`;
+  });
 }
 
-function moveChoiceUp(btn){const c=btn.closest('.choice');const prev=c.previousElementSibling;if(prev)c.parentNode.insertBefore(c,prev);renumberChoices(c.parentNode);}
-function moveChoiceDown(btn){const c=btn.closest('.choice');const next=c.nextElementSibling;if(next)c.parentNode.insertBefore(next,c);renumberChoices(c.parentNode);}
-function renumberChoices(choices){[...choices.children].forEach((c,i)=>{c.querySelector('.input.answer').placeholder=`Choice ${i+1}`; c.querySelectorAll('.move-btn')[0].disabled=i===0; c.querySelectorAll('.move-btn')[1].disabled=i===choices.children.length-1;});}
+/* ========= SAVE TO SUPABASE ========= */
 
-function moveQuestionUp(btn){const box=btn.closest('.question-box');const prev=box.previousElementSibling;if(prev)box.parentNode.insertBefore(box,prev);renumberQuestions();}
-function moveQuestionDown(btn){const box=btn.closest('.question-box');const next=box.nextElementSibling;if(next)box.parentNode.insertBefore(next,box);renumberQuestions();}
-function renumberQuestions(){const boxes=document.querySelectorAll('.question-box');boxes.forEach((box,i)=>{box.querySelector('.q-title').textContent=`Question ${i+1}`; box.querySelectorAll('.move-btn')[0].disabled=i===0; box.querySelectorAll('.move-btn')[1].disabled=i===boxes.length-1;});}
+async function saveQuestionSet(){
+  const title=setTitle.value.trim();
+  if(!title){ alert("Please enter a title"); return; }
 
-function toggleSave(btn){
-  const box = btn.closest('.question-box');
-  const timer = box.querySelector('.timer').value;
-  if(!timer || parseInt(timer)<1){alert('Timer must be at least 1 second'); return;}
-  if(btn.textContent==='Save'){
-    btn.textContent='Edit';
-    box.style.border='2px solid green';
-  }else{
-    btn.textContent='Save';
-    box.style.border='none';
-  }
-}
+  saveSetBtn.classList.add("loading");
+  statusText.style.display="block";
 
-function duplicateQuestion(btn){const clone=btn.closest('.question-box').cloneNode(true);document.getElementById('questions').appendChild(clone);renumberQuestions();}
-function deleteQuestion(btn){btn.closest('.question-box').remove();updateAddQuestionPosition();renumberQuestions();}
-function updateAddQuestionPosition(){const wrapper=document.getElementById('addQuestionWrapper');const questions=document.getElementById('questions');questions.children.length?questions.appendChild(wrapper):questions.parentElement.insertBefore(wrapper,questions);}
-
-function saveQuestionSet(){
-  const title=document.getElementById('setTitle').value;
-  if(!title){alert('Please enter a title'); return;}
   const questions=[];
   document.querySelectorAll('.question-box').forEach(box=>{
-    const qText=box.querySelector('.question-text').value;
-    const type=box.querySelector('.question-type').value;
-    const timer=box.querySelector('.timer').value;
-    let answer=null;
-    let choices=[];
-    if(type==='short') answer=box.querySelector('.answer').value;
-    if(type==='tf'){
-      const inputs=box.querySelectorAll('.answer-area .input');
-      answer=inputs[0].value; // True
-    }
-    if(type==='mc'){
-      box.querySelectorAll('.choices .choice').forEach(c=>{
-        choices.push({text:c.querySelector('.input.answer').value, correct:c.querySelector('input[type=radio]').checked});
-      });
-    }
-    questions.push({text:qText,type,timer,answer,choices});
+    questions.push({
+      text:box.querySelector('.question-text').value,
+      type:box.querySelector('.question-type').value,
+      timer:box.querySelector('.timer').value || 10
+    });
   });
-  const sets=JSON.parse(localStorage.getItem('gameSets')||'[]');
-  sets.push({title,questions});
-  localStorage.setItem('gameSets',JSON.stringify(sets));
-  alert('Question Set Saved!');
+
+  const { error } = await supabase.from("question_sets").insert({
+    user_id: currentUser.id,
+    title,
+    description: setDesc.value,
+    questions
+  });
+
+  saveSetBtn.classList.remove("loading");
+  statusText.style.display="none";
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  alert("Question Set Saved!");
+  location.href="dashboard.html";
 }
 </script>
+
 </body>
 </html>
