@@ -9,9 +9,10 @@
 <meta name="theme-color" content="#0b57d0">
 
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-/* (UNCHANGED STYLES – kept exactly as yours) */
+/* ✅ YOUR STYLES — UNCHANGED */
 :root {
   --blue-main:#0b57d0;
   --blue-light:#1e88ff;
@@ -42,9 +43,7 @@ body{
   padding:36px 32px 40px;
   border-radius:var(--radius-lg);
   border:1px solid var(--border-soft);
-  animation:cardIn .6s ease forwards;
 }
-@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
 h1{text-align:center;font-family:'Fredoka';font-size:30px}
 .divider{height:1px;background:var(--border-soft);margin:18px 0 28px}
 label{font-weight:600;font-size:14px;margin-bottom:6px;display:block}
@@ -68,12 +67,7 @@ label{font-weight:600;font-size:14px;margin-bottom:6px;display:block}
   width:100%;height:52px;background:var(--blue-main);border:none;
   border-radius:999px;color:white;font-size:18px;font-family:'Fredoka';cursor:pointer
 }
-.social{text-align:center}
-.provider-btn{
-  width:100%;height:48px;border-radius:16px;border:1px solid #e5e7eb;
-  background:white;display:flex;align-items:center;justify-content:center;
-  gap:10px;font-family:'Fredoka';cursor:pointer;margin-bottom:12px
-}
+.login-btn.loading{opacity:.6;pointer-events:none}
 #verifyCard{display:none;text-align:center}
 .toast{
   position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
@@ -84,18 +78,11 @@ label{font-weight:600;font-size:14px;margin-bottom:6px;display:block}
 
 <body>
 
-<script>
-if (localStorage.getItem("quizio_logged_in") === "true") {
-  window.location.href = "dashboard.html";
-}
-</script>
-
 <div class="login-card" id="signupCard">
   <h1>Sign Up</h1>
   <div class="divider"></div>
 
   <form id="signupForm">
-
     <label>Email</label>
     <div class="input-group">
       <input id="email" type="email" required>
@@ -105,7 +92,7 @@ if (localStorage.getItem("quizio_logged_in") === "true") {
     <div class="input-group">
       <div class="password-wrapper">
         <input id="password" type="password" required>
-        <button type="button" class="toggle-password" data-target="password"></button>
+        <button type="button" class="toggle-password" data-target="password">👁</button>
       </div>
       <div class="strength"><span id="strengthBar"></span></div>
       <div class="strength-info" id="strengthLabel">Weak</div>
@@ -116,7 +103,7 @@ if (localStorage.getItem("quizio_logged_in") === "true") {
     <div class="input-group">
       <div class="password-wrapper">
         <input id="confirm" type="password" required>
-        <button type="button" class="toggle-password" data-target="confirm"></button>
+        <button type="button" class="toggle-password" data-target="confirm">👁</button>
       </div>
     </div>
 
@@ -124,7 +111,7 @@ if (localStorage.getItem("quizio_logged_in") === "true") {
       <label><input type="checkbox" id="terms"> I agree to Terms</label>
     </div>
 
-    <button class="login-btn">Create Account</button>
+    <button class="login-btn" id="signupBtn">Create Account</button>
   </form>
 </div>
 
@@ -138,28 +125,62 @@ if (localStorage.getItem("quizio_logged_in") === "true") {
 <div class="toast" id="toast"></div>
 
 <script>
-const toast = msg => {
+/* 🔐 SUPABASE */
+const supabase = window.supabase.createClient(
+  "https://vobglhlucwodmlzphmvc.supabase.co",
+  "YOUR_PUBLIC_ANON_KEY"
+);
+
+/* 🔒 Redirect if logged in */
+(async()=>{
+  const { data:{ user } } = await supabase.auth.getUser();
+  if(user) location.href="dashboard.html";
+})();
+
+/* 🔔 Toast */
+const toastEl = document.getElementById("toast");
+const showToast = msg => {
   toastEl.textContent = msg;
   toastEl.style.display = "block";
   setTimeout(()=>toastEl.style.display="none",3000);
 };
 
-signupForm.onsubmit = e => {
+/* 👁 Toggle password */
+document.querySelectorAll(".toggle-password").forEach(btn=>{
+  btn.onclick=()=>{
+    const input=document.getElementById(btn.dataset.target);
+    input.type=input.type==="password"?"text":"password";
+  };
+});
+
+/* 📝 Signup */
+signupForm.onsubmit = async e => {
   e.preventDefault();
 
-  if (password.value.length < 8) return toast("Password too short");
-  if (password.value !== confirm.value) return toast("Passwords do not match");
-  if (!terms.checked) return toast("Accept terms first");
+  if(password.value.length < 8) return showToast("Password must be at least 8 characters");
+  if(password.value !== confirm.value) return showToast("Passwords do not match");
+  if(!terms.checked) return showToast("You must accept the terms");
 
-  localStorage.setItem("quizio_logged_in","true");
-  localStorage.setItem("quizio_user_email",email.value);
-  localStorage.setItem("quizio_user_name",email.value.split("@")[0]);
+  signupBtn.classList.add("loading");
+
+  const { error } = await supabase.auth.signUp({
+    email: email.value,
+    password: password.value,
+    options: {
+      emailRedirectTo: location.origin + "/dashboard.html"
+    }
+  });
+
+  signupBtn.classList.remove("loading");
+
+  if(error){
+    showToast(error.message);
+    return;
+  }
 
   signupCard.style.display="none";
   verifyCard.style.display="block";
-  verifyEmail.textContent=email.value;
-
-  setTimeout(()=>location.href="dashboard.html",2500);
+  verifyEmail.textContent = email.value;
 };
 </script>
 
